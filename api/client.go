@@ -292,12 +292,20 @@ func (c *Client) Heartbeat(ctx context.Context) error {
 	}
 	return nil
 }
+
 func (c *Client) Embeddings(ctx context.Context, req *EmbeddingRequest) (*EmbeddingResponse, error) {
 	var resp EmbeddingResponse
 	if err := c.do(ctx, http.MethodPost, "/api/embeddings", req, &resp); err != nil {
 		return nil, err
 	}
 	return &resp, nil
+}
+
+func (c *Client) ClearHistory(ctx context.Context) error {
+	if err := c.do(ctx, http.MethodDelete, "/api/history", nil, nil); err != nil {
+		return err
+	}
+	return nil
 }
 
 func (c *Client) CreateBlob(ctx context.Context, digest string, r io.Reader) error {

@@ -863,6 +863,22 @@ func CopyModelHandler(c *gin.Context) {
 	}
 }
 
+func ClearHistoryHandler(c *gin.Context) {
+	home, err := os.UserHomeDir()
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+	}
+
+	path := filepath.Join(home, ".ollama", "history")
+	if err := os.Remove(path); err != nil {
+		if errors.Is(err, os.ErrNotExist) {
+			c.JSON(http.StatusNoContent, nil)
+		}
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+	}
+	c.JSON(http.StatusOK, nil)
+}
+
 func HeadBlobHandler(c *gin.Context) {
 	path, err := GetBlobsPath(c.Param("digest"))
 	if err != nil {
@@ -953,6 +969,7 @@ func (s *Server) GenerateRoutes() http.Handler {
 	r.POST("/api/copy", CopyModelHandler)
 	r.DELETE("/api/delete", DeleteModelHandler)
 	r.POST("/api/show", ShowModelHandler)
+	r.DELETE("/api/history", ClearHistoryHandler)
 	r.POST("/api/blobs/:digest", CreateBlobHandler)
 	r.HEAD("/api/blobs/:digest", HeadBlobHandler)
 

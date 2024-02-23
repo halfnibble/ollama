@@ -462,21 +462,17 @@ func PullHandler(cmd *cobra.Command, args []string) error {
 }
 
 func ClearHistoryHandler(cmd *cobra.Command, args []string) error {
-	home, err := os.UserHomeDir()
+
+	client, err := api.ClientFromEnvironment()
 	if err != nil {
 		return err
 	}
 
-	path := filepath.Join(home, ".ollama", "history")
-	if err := os.Remove(path); err != nil {
-		if errors.Is(err, os.ErrNotExist) {
-			fmt.Println("chat history is already empty")
-			return nil
-		}
+	err = client.ClearHistory(cmd.Context())
+	if err != nil {
 		return err
 	}
-
-	fmt.Println("cleared chat history")
+	fmt.Println("chat history cleared")
 
 	return nil
 }
